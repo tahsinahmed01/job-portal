@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
 
 function MapPinIcon({ className = 'h-5 w-5' }) {
   return (
@@ -19,7 +20,7 @@ export default function JobTicker() {
   const [location, setLocation] = useState('All Locations');
 
   useEffect(() => {
-    fetch('/api/jobs')
+    fetch('/api/jobs?limit=8')
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch jobs');
         return res.json();
@@ -50,21 +51,30 @@ export default function JobTicker() {
   return (
     <section id="latest-jobs" className="bg-slate-50 py-14 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">Latest Openings</h2>
             <p className="mt-1 text-slate-600">Fresh roles from our hiring partners.</p>
           </div>
-          {(keyword || location !== 'All Locations') && (
-            <p className="text-sm text-slate-500">
-              Showing {filteredJobs.length} result{filteredJobs.length === 1 ? '' : 's'}
-            </p>
-          )}
+          <div className="flex items-center gap-4">
+            {(keyword || location !== 'All Locations') && (
+              <p className="text-sm text-slate-500">
+                Showing {filteredJobs.length} result{filteredJobs.length === 1 ? '' : 's'}
+              </p>
+            )}
+            <Link
+              href="/jobs"
+              className="group flex items-center gap-1 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors duration-200 hover:border-blue-600 hover:text-blue-600"
+            >
+              See All Jobs
+              <ChevronRight className="h-4 w-4 transition-colors duration-200 group-hover:text-blue-600" />
+            </Link>
+          </div>
         </div>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div key={i} className="h-44 animate-pulse rounded-2xl border border-slate-200 bg-white" />
             ))}
           </div>
@@ -74,8 +84,8 @@ export default function JobTicker() {
             <p className="mt-2 text-slate-500">Try a different keyword or location.</p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredJobs.map((job) => (
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {filteredJobs.slice(0, 8).map((job) => (
               <article
                 key={job.id}
                 className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-lg"
@@ -86,7 +96,11 @@ export default function JobTicker() {
                   </div>
                   {(job.salaryMin || job.salaryMax) && (
                     <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                      ${Math.round(job.salaryMin / 1000)}k - ${Math.round(job.salaryMax / 1000)}k
+                      {job.salaryMin && job.salaryMax
+                        ? `$${Math.round(job.salaryMin / 1000)}k - $${Math.round(job.salaryMax / 1000)}k`
+                        : job.salaryMin
+                        ? `$${Math.round(job.salaryMin / 1000)}k+`
+                        : `Up to $${Math.round(job.salaryMax / 1000)}k`}
                     </span>
                   )}
                 </div>
@@ -97,7 +111,7 @@ export default function JobTicker() {
                   {job.location}
                 </p>
                 <Link
-                  href={`/job/${job.id}`}
+                  href={`/jobs/${job.id}`}
                   className="mt-5 inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-300 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
                 >
                   View Details
