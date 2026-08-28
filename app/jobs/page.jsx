@@ -1,25 +1,19 @@
 import JobCard from '@/components/jobs/JobCard';
 import JobFilters from '@/components/jobs/JobFilters';
 
+import { getJobs } from '@/lib/getJobs';
+
 export const metadata = {
   title: 'Browse Jobs - Hired',
 };
 
-async function getJobs(searchParams) {
-  const params = new URLSearchParams(searchParams);
-  params.set('paginate', 'true');
-  const res = await fetch(`http://localhost:3000/api/jobs?${params.toString()}`, {
-    cache: 'no-store', // Always fetch fresh data for filters to work correctly in dev
-  });
-  if (!res.ok) {
-    throw new Error('Failed to fetch jobs');
-  }
-  return res.json();
-}
-
 export default async function JobsPage({ searchParams }) {
   const params = await searchParams;
-  const data = await getJobs(params);
+  
+  const urlParams = new URLSearchParams(params);
+  urlParams.set('paginate', 'true');
+  
+  const data = await getJobs(urlParams);
   
   const { jobs, totalCount, page, totalPages } = data;
 
