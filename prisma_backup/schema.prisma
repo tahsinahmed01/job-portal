@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CANDIDATE
+  RECRUITER
+  ADMIN
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum ExperienceLevel {
+  ENTRY
+  MID
+  SENIOR
+  LEAD
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  clerkId      String        @unique
+  email        String        @unique
+  name         String?
+  role         Role          @default(CANDIDATE)
+  createdAt    DateTime      @default(now())
+  companies    Company[]
+  applications Application[]
+}
+
+model Company {
+  id          Int      @id @default(autoincrement())
+  name        String
+  logoUrl     String?
+  description String?
+  industry    String?
+  website     String?
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  jobs        Job[]
+}
+
+model Job {
+  id              Int             @id @default(autoincrement())
+  title           String
+  description     String
+  category        String?
+  location        String?
+  salaryMin       Int?
+  salaryMax       Int?
+  employmentType  EmploymentType
+  experienceLevel ExperienceLevel
+  status          JobStatus       @default(DRAFT)
+  companyId       Int
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  postedAt        DateTime        @default(now())
+  deadline        DateTime?
+  applications    Application[]
+
+  @@index([status])
+}
+
+model Application {
+  id          Int               @id @default(autoincrement())
+  userId      Int
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId       Int
+  job         Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  status      ApplicationStatus @default(PENDING)
+  resumeLink  String?
+  coverLetter String?
+  appliedAt   DateTime          @default(now())
+
+  @@index([userId])
+}
