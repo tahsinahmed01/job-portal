@@ -10,7 +10,7 @@ export async function GET() {
         _count: {
           select: {
             jobs: {
-              where: { status: 'PUBLISHED' }
+              where: { status: 'APPROVED' }
             }
           }
         }

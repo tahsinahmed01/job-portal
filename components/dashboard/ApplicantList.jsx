@@ -50,7 +50,7 @@ export default function ApplicantList({ job, applications }) {
         <div>
           <h3 className="text-xl font-bold text-slate-900">{job.title}</h3>
           <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
-            <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${job.status === 'PUBLISHED' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-slate-100 text-slate-800 border-slate-200'}`}>
+            <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${job.status === 'APPROVED' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-slate-100 text-slate-800 border-slate-200'}`}>
               {job.status}
             </span>
             <span>&bull;</span>

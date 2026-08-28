@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SignInButton, Show, UserButton } from '@clerk/nextjs';
+import { SignInButton, Show, UserButton, useUser } from '@clerk/nextjs';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -23,6 +23,18 @@ function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const { user, isLoaded } = useUser();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    if (isLoaded && user && (user.publicMetadata?.role === 'ADMIN' || user.publicMetadata?.role === 'RECRUITER')) {
+      fetch('/api/jobs/pending-count')
+        .then(res => res.json())
+        .then(data => setPendingCount(data.count || 0))
+        .catch(console.error);
+    }
+  }, [isLoaded, user]);
 
   return (
     <header
@@ -88,7 +100,18 @@ function Navbar() {
         </ul>
 
         {/* Right actions */}
-        <div className="hidden items-center gap-2.5 sm:flex">
+        <div className="hidden items-center gap-4 sm:flex">
+          {pendingCount > 0 && user?.publicMetadata?.role && (user.publicMetadata.role === 'ADMIN' || user.publicMetadata.role === 'RECRUITER') && (
+            <Link href={user.publicMetadata.role === 'ADMIN' ? '/admin' : '/dashboard'} className="relative inline-flex items-center text-slate-500 hover:text-indigo-600 transition-colors">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                {pendingCount}
+              </span>
+            </Link>
+          )}
+
           <Show when="signed-out">
             <SignInButton mode="modal">
               <button

@@ -14,7 +14,7 @@ export async function GET(request) {
     const skip = (page - 1) * limit;
 
     const where = {
-      status: 'PUBLISHED', // Default to published jobs
+      status: 'APPROVED', // Default to approved jobs
     };
 
     if (category) where.category = category;
@@ -56,21 +56,27 @@ import { getOrCreateUser } from '@/lib/auth';
 export async function POST(request) {
   try {
     const user = await getOrCreateUser();
-    if (!user || user.role !== 'RECRUITER') {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!user.companies || user.companies.length === 0) {
-      return NextResponse.json({ error: 'You must create a company profile first' }, { status: 400 });
+    const data = await request.json();
+
+    if (!data.companyId) {
+      return NextResponse.json({ error: 'Company ID is required' }, { status: 400 });
     }
 
-    const data = await request.json();
-    
+    let status = 'PENDING';
+    if (user.role === 'RECRUITER' && user.companies && user.companies.some(c => c.id === parseInt(data.companyId))) {
+      status = 'APPROVED';
+    }
+
     const job = await prisma.job.create({
       data: {
         ...data,
-        status: 'PUBLISHED',
-        companyId: user.companies[0].id
+        companyId: parseInt(data.companyId),
+        status,
+        postedById: user.id
       },
     });
     return NextResponse.json(job, { status: 201 });

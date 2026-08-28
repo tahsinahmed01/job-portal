@@ -36,6 +36,9 @@ enum JobStatus {
   DRAFT
   PUBLISHED
   CLOSED
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum ApplicationStatus {
@@ -55,6 +58,7 @@ model User {
   createdAt    DateTime      @default(now())
   companies    Company[]
   applications Application[]
+  postedJobs   Job[]         @relation("JobPostedBy")
 }
 
 model Company {
@@ -85,9 +89,11 @@ model Job {
   requirements    String?
   skills          String[]
   vacancyCount    Int             @default(1)
-  status          JobStatus       @default(DRAFT)
+  status          JobStatus       @default(PENDING)
   companyId       Int
   company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  postedById      Int?
+  postedBy        User?           @relation("JobPostedBy", fields: [postedById], references: [id])
   postedAt        DateTime        @default(now())
   deadline        DateTime?
   applications    Application[]

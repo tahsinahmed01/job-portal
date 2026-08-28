@@ -26,7 +26,7 @@ export default function AdminDashboard() {
 
   const handleJobStatusChange = async (id, status) => {
     try {
-      const res = await fetch(`/api/admin/jobs/${id}`, {
+      const res = await fetch(`/api/jobs/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
@@ -102,7 +102,46 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <h2 className="text-xl font-bold text-slate-800 mb-4">Jobs</h2>
+                <h2 className="text-xl font-bold text-amber-600 mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Pending Approvals
+                </h2>
+                <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200 mb-8">
+                  <table className="min-w-full divide-y divide-slate-200">
+                    <thead className="bg-amber-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase">Title</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase">Company</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 bg-white">
+                      {jobs.filter(j => j.status === 'PENDING').map(j => (
+                        <tr key={j.id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{j.title}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{j.company?.name || '-'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <span className="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-amber-100 text-amber-800">
+                              {j.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 space-x-2">
+                            <button onClick={() => handleJobStatusChange(j.id, 'APPROVED')} className="text-emerald-600 hover:text-emerald-900 font-medium">Approve</button>
+                            <button onClick={() => handleJobStatusChange(j.id, 'REJECTED')} className="text-red-600 hover:text-red-900 font-medium">Reject</button>
+                          </td>
+                        </tr>
+                      ))}
+                      {jobs.filter(j => j.status === 'PENDING').length === 0 && (
+                        <tr><td colSpan={4} className="px-6 py-4 text-center text-sm text-slate-500">No pending jobs</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold text-slate-800 mb-4">All Jobs</h2>
                 <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
                   <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50">
@@ -114,17 +153,17 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 bg-white">
-                      {jobs.map(j => (
+                      {jobs.filter(j => j.status !== 'PENDING').map(j => (
                         <tr key={j.id}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{j.title}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{j.company?.name || '-'}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${j.status === 'PUBLISHED' ? 'bg-green-100 text-green-800' : j.status === 'CLOSED' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                            <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${j.status === 'APPROVED' ? 'bg-green-100 text-green-800' : j.status === 'CLOSED' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
                               {j.status}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 space-x-2">
-                            <button onClick={() => handleJobStatusChange(j.id, 'PUBLISHED')} className="text-indigo-600 hover:text-indigo-900 font-medium">Publish</button>
+                            <button onClick={() => handleJobStatusChange(j.id, 'APPROVED')} className="text-indigo-600 hover:text-indigo-900 font-medium">Approve</button>
                             <button onClick={() => handleJobStatusChange(j.id, 'DRAFT')} className="text-yellow-600 hover:text-yellow-900 font-medium">Draft</button>
                             <button onClick={() => handleJobStatusChange(j.id, 'CLOSED')} className="text-red-600 hover:text-red-900 font-medium">Close</button>
                           </td>

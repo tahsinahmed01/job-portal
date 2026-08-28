@@ -45,7 +45,7 @@ export default async function JobDetails({ params }) {
   // Fetch relevant jobs
   const relevantJobs = await prisma.job.findMany({
     where: {
-      status: 'PUBLISHED',
+      status: 'APPROVED',
       id: { not: job.id },
       ...(job.category ? { category: job.category } : {})
     },

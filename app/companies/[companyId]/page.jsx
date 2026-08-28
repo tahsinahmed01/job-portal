@@ -40,7 +40,7 @@ export default async function CompanyDetails({ params }) {
     );
   }
 
-  const publishedJobs = company.jobs?.filter(j => j.status === 'PUBLISHED') || [];
+  const publishedJobs = company.jobs?.filter(j => j.status === 'APPROVED') || [];
 
   return (
     <main className="min-h-screen bg-slate-50 py-12">

@@ -5,7 +5,7 @@ export default async function sitemap() {
 
   // Fetch dynamic routes
   const jobs = await prisma.job.findMany({
-    where: { status: 'PUBLISHED' },
+    where: { status: 'APPROVED' },
     select: { id: true, postedAt: true }
   });
   
